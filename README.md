@@ -7,7 +7,7 @@ Official repository for evaluating collision checking policies that use bayesian
 
 
 ## Datasets
-The repository containing datasets is [graph_collision_checking_dataset](https://github.com/sanjibac/graph_collision_checking_dataset)
+The repository containing datasets is [graph_collision_checking_dataset](https://github.com/bkhnk48/graph_collision_checking_dataset)
 
 ## Setup
 1. Clone the repository and the datasets folder

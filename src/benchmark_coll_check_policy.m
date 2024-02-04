@@ -1,4 +1,4 @@
-%% 
+%%
 % Copyright (c) 2017 Carnegie Mellon University, Sanjiban Choudhury <sanjibac@andrew.cmu.edu>
 %
 % For License information please see the LICENSE file in the root directory.
@@ -62,9 +62,9 @@ switch set
         % MVOI
         policy_set{length(policy_set)+1} = @() policyMaxMVOI(path_edgeid_map, train_world_library_assignment, train_coll_check_results, 0.01, false);
         % BISECT
-        policy_set{length(policy_set)+1} = @() policyDRDBernoulli(path_edgeid_map, edge_check_cost, train_world_library_assignment, train_coll_check_results, 0.01, false, 0); 
+        policy_set{length(policy_set)+1} = @() policyDRDBernoulli(path_edgeid_map, edge_check_cost, train_world_library_assignment, train_coll_check_results, 0.01, false, 0);
         % BISECT + MaxProbReg
-        policy_set{length(policy_set)+1} = @() policyDRDBernoulli(path_edgeid_map, edge_check_cost, train_world_library_assignment, train_coll_check_results, 0.01, false, 1); 
+        policy_set{length(policy_set)+1} = @() policyDRDBernoulli(path_edgeid_map, edge_check_cost, train_world_library_assignment, train_coll_check_results, 0.01, false, 1);
     case 2
         % DIRECT + BISECT
         load(strcat(set_dataset, 'saved_decision_trees/drd_decision_tree_data.mat'), 'decision_tree_data'); % Tải dữ liệu cây quyết định
@@ -73,6 +73,7 @@ end
 
 %% Perform stuff
 cumulative_cost_set = zeros(length(policy_set), length(test_id)); % Khởi tạo tập chi phí tích lũy
+counter = 0;
 for i = 1:length(policy_set) % Vòng lặp qua tất cả các chính sách
     parfor j = 1:length(test_id) % Vòng lặp qua tất cả các ID kiểm tra
         policy_fn = policy_set{i}; % Lấy chính sách
@@ -85,13 +86,17 @@ for i = 1:length(policy_set) % Vòng lặp qua tất cả các chính sách
             if (isempty(selected_edge)) % Kiểm tra nếu không có cạnh nào được chọn
                 error('No valid selection made'); % Tạo lỗi nếu không có lựa chọn hợp lệ
             end
-    
+
             outcome = coll_check_results(test_world, selected_edge); % Quan sát kết quả
             policy.setOutcome(selected_edge, outcome); % Đặt kết quả cho chính sách
             selected_edge_outcome_matrix = [selected_edge_outcome_matrix; selected_edge outcome]; % Cập nhật ma trận sự kiện
-    
+
             if (any_path_feasible( path_edgeid_map, selected_edge_outcome_matrix )) % Kiểm tra nếu bất kỳ đường đi nào khả thi
                 break; % Thoát khỏi vòng lặp
+            end
+            counter++;
+            if(mod(counter, 1000) == 0)
+                disp(sprintf('Loop #%d', counter));
             end
         end
         cumulative_cost_set(i, j) = sum(edge_check_cost(selected_edge_outcome_matrix(:,1))); % Tính tổng chi phí kiểm tra cạnh
